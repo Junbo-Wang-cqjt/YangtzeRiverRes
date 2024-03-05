@@ -160,7 +160,7 @@ public class simOptProcess_SanXia {
 		double other_mini_flow = basicbean.getOther_mini_flow();// 其他最小下泄流量——单值
 		double other_mini_flowpro[] = basicbean.getOther_mini_flowpro();// 其他最小下泄流量过程OMFP
 		// -----水量平衡表-----------
-		double balances[][] = new double[12][inflowss.length + 1];// 0水位，1库容，2弃水，3发电流量，4发电量，5其他
+		double balances[][] = new double[14][inflowss.length + 1];// 0水位，1库容，2弃水，3发电流量，4发电量，5其他
 		// -----保证率--------------
 		double hyp_guarant = basicbean.getHypower_guarant();
 		double eco_guarant = basicbean.getAgr_guarant();
@@ -482,26 +482,49 @@ public class simOptProcess_SanXia {
 			}
 
 			// ----水量平衡表------------
+			// if (saves == 1) {
+			// 	balances[0][i + 1] = startlev;// optlines[i];
+			// 	balances[1][i + 1] = startvol;
+			// 	balances[2][i + 1] = inflowss[i];
+			// 	balances[3][i + 1] = 0;
+			// 	if (upstream != null) {
+			// 		balances[3][i + 1] = upstream[i];
+			// 	} // 上游水库来水
+			// 	balances[4][i + 1] = spills / 24 / 3600;// 弃水
+			// 	balances[5][i + 1] = citySupplyFlow;
+			// 	balances[6][i + 1] = agrSupplyFlow;
+			// 	balances[7][i + 1] = hydroQout;
+			// 	balances[7][0] = 1 - baozhelv[0] / inflowss.length;
+			// 	balances[8][i + 1] = que_ecoflow;
+			// 	balances[8][0] = 1 - baozhelv[1] / inflowss.length;
+			// 	balances[9][i + 1] = que_navflow;
+			// 	balances[9][0] = 1 - baozhelv[2] / inflowss.length;
+			// 	balances[10][i + 1] = energy;
+			// 	balances[10][0] = (balances[10][0] + balances[10][i + 1]) / 100000000;
+			// 	balances[11][i + 1] = hydroQout + spills / 24 / 3600;// 下泄
+			// }
 			if (saves == 1) {
-				balances[0][i + 1] = startlev;// optlines[i];
-				balances[1][i + 1] = startvol;
-				balances[2][i + 1] = inflowss[i];
-				balances[3][i + 1] = 0;
+				balances[0][i + 1] = minLeve[i];
+				balances[1][i + 1] = startlev;// optlines[i];
+				balances[2][i + 1] = maxcontrolev[i];
+				balances[3][i + 1] = startvol;
+				balances[4][i + 1] = inflowss[i];
+				balances[5][i + 1] = 0;
 				if (upstream != null) {
 					balances[3][i + 1] = upstream[i];
 				} // 上游水库来水
-				balances[4][i + 1] = spills / 24 / 3600;// 弃水
-				balances[5][i + 1] = citySupplyFlow;
-				balances[6][i + 1] = agrSupplyFlow;
-				balances[7][i + 1] = hydroQout;
-				balances[7][0] = 1 - baozhelv[0] / inflowss.length;
-				balances[8][i + 1] = que_ecoflow;
-				balances[8][0] = 1 - baozhelv[1] / inflowss.length;
-				balances[9][i + 1] = que_navflow;
-				balances[9][0] = 1 - baozhelv[2] / inflowss.length;
-				balances[10][i + 1] = energy;
-				balances[10][0] = (balances[10][0] + balances[10][i + 1]) / 100000000;
-				balances[11][i + 1] = hydroQout + spills / 24 / 3600;// 下泄
+				balances[6][i + 1] = spills / 24 / 3600;// 弃水
+				balances[7][i + 1] = citySupplyFlow;
+				balances[8][i + 1] = agrSupplyFlow;
+				balances[9][i + 1] = hydroQout;
+				balances[9][0] = 1 - baozhelv[0] / inflowss.length;
+				balances[10][i + 1] = que_ecoflow;
+				balances[10][0] = 1 - baozhelv[1] / inflowss.length;
+				balances[11][i + 1] = que_navflow;
+				balances[11][0] = 1 - baozhelv[2] / inflowss.length;
+				balances[12][i + 1] = energy;
+				balances[12][0] = (balances[10][0] + balances[10][i + 1]) / 100000000;
+				balances[13][i + 1] = hydroQout + spills / 24 / 3600;// 下泄
 			}
 			// -----------------------
 			startvol = endvolss;
