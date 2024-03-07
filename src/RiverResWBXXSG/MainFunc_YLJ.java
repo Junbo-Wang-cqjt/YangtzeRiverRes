@@ -15,7 +15,7 @@ public class MainFunc_YLJ {
 		 * 读取数据模块
 		 * /Users/lovemevol/Documents/IdeaProjects/YangtzeRiverRes/ResStations/ResColLev.xls
 		 */
-		String OutputName = "text3 300 300 300.xls";// ------------------------------------------------------定义输出名
+		String OutputName = "text4 400 1150 1392.xls";// ------------------------------------------------------定义输出名
 		int time = 301;// -----------------------------------------------------------------------优化次数
 		// -----水库群计算顺序获取---------------
 		getResINFO dddd = new getResINFO();

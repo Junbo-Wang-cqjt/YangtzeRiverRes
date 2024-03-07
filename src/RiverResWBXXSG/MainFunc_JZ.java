@@ -15,8 +15,8 @@ public class MainFunc_JZ {
 		 * 读取数据模块
 		 * /Users/lovemevol/Documents/IdeaProjects/YangtzeRiverRes/ResStations/ResColLev.xls
 		 */
-		String OutputName = "test7 100 1750 1968 ys.xls.xls";// ------------------------------------------------------定义输出名
-		int time = 301;// -----------------------------------------------------------------------优化次数
+		String OutputName = "test9 100 1000 1968 ys.xls.xls";// ------------------------------------------------------定义输出名
+		int time = 601;// -----------------------------------------------------------------------优化次数
 		// -----水库群计算顺序获取---------------
 		getResINFO dddd = new getResINFO();
 		String filepath1 = "RiverData/JSJ/JZ/ResStr.xls";

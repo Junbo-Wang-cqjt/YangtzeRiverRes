@@ -53,7 +53,7 @@ public class POAOptimal {
         // double sim[][]=new double[time][];
         int a = 0;
         int b = 50;
-        int c = 100;// --------------------------------------离散步长每循环b次进行重置,每循环c次输出水量平衡表
+        int c = 50;// --------------------------------------离散步长每循环b次进行重置,每循环c次输出水量平衡表
         for (int i = 0; i < time; i++) {
             if (i % b == 0) {
                 a = 0;
@@ -200,7 +200,7 @@ public class POAOptimal {
 
         int resNum = res_ope_chart.length;// 第i个水库调度线条数（参与调度的水库个数）
         int stageNum = res_ope_chart[0].length;// 第i个水库调度线调度阶段数-时段（优化的时段数）
-        System.out.println("第" + ComNum + "次优化  opeNum=" + resNum + "  stageNum=" + stageNum);
+        System.out.print("第" + ComNum + "次优化  opeNum=" + resNum + "  stageNum=" + stageNum);
         for (int j = 0; j < (stageNum); j++) {// 对水库i的j时段进行调度线优化(stageNum-1)
             double value[] = new double[resNum];
             double steplenght[] = new double[resNum];
@@ -249,7 +249,7 @@ public class POAOptimal {
                     }
                 }
             }
-            if (j % 1000 == 0) {
+            if (j % stageNum == 0) {
                 long endTime = System.currentTimeMillis();
                 long useTime = (endTime - startTime) / 1000 / 60;
                 String Times = "";
@@ -258,7 +258,7 @@ public class POAOptimal {
                 } else {
                     Times = (int) Math.floor(useTime / 60) + "h " + (useTime % 60) + "min";
                 }
-                System.out.println("第" + ComNum + "/" + time + "次优化  stage=" + j + "   maxIndex=" + maxIndex
+                System.out.println("    第" + ComNum + "/" + time + "次优化  stage=" + j + "   maxIndex=" + maxIndex
                         + "   maxResult=" + maxResult + "      useTime：" + Times);// startTime
             }
 

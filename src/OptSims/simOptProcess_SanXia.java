@@ -7,7 +7,9 @@ import ToolFunction.MathFun;
 import jxl.write.WriteException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 public class simOptProcess_SanXia {
@@ -65,18 +67,30 @@ public class simOptProcess_SanXia {
 				// -----------------------------
 
 				double record[] = (double[]) rtresult.elementAt(0);
-				double deepdestroy = 0;
-				deepdestroy = record[0] * 100;
-				// System.out.println(startK);
-				if (startK == 0) {
-					K[i] = 1000000000 / (record[1]);
-				}
-				double energys = (record[1]) * K[i] * 10;/// 10000
-				double guarantEPunish = record[2] / 100;// (timestep)
-				double que_ecoPunish = record[3] / 1000;// (Double)rtresult.elementAt(2);
-				double que_navPunish = record[4] / 1000;// (Double)rtresult.elementAt(3);
-				double minLeveLimit = record[5] * 100000000;// 小于低水位的惩罚
-				double spills = record[6];
+				double deepdestroy = record[0];
+				double spills = record[1];
+				double deepminLev = record[2];
+				double energys = record[3];
+				double guarantEPunish = record[4];
+				double que_ecoPunish = record[5];
+				double que_navPunish = record[6];
+				double minLeveLimit = record[7];
+				
+
+
+
+				// double deepdestroy = 0;
+				// deepdestroy = record[0] * 100;
+				// // System.out.println(startK);
+				// if (startK == 0) {
+				// 	K[i] = 1000000000 / (record[1]);
+				// }
+				// double energys = (record[1]) * K[i] ;/// 10000
+				// double guarantEPunish = record[2] / 1000;// (timestep)
+				// double que_ecoPunish = record[3] / 10000;// (Double)rtresult.elementAt(2);
+				// double que_navPunish = record[4] / 10000;// (Double)rtresult.elementAt(3);
+				// double minLeveLimit = record[5] * 10000000;// 小于低水位的惩罚
+				// double spills = record[6];
 				/**
 				 * 保证率的控制
 				 * 不满足相应目标的保证率，则惩罚
@@ -95,7 +109,18 @@ public class simOptProcess_SanXia {
 				/**
 				 * 目标函数计算
 				 */
-				fitness = fitness + (energys - minLeveLimit - que_ecoPunish - que_navPunish);// -deepdestroy
+				fitness = fitness + (deepdestroy + spills + deepminLev + energys + guarantEPunish + que_ecoPunish + que_navPunish + minLeveLimit);// -deepdestroy
+				// System.out.println("fitness: " + fitness);
+				// System.out.print("deepdestroy: " + deepdestroy + " ");
+				// System.out.print("spills: " + spills + " ");
+				// System.out.print("deepminLev: " + deepminLev + " ");
+				// System.out.print("energys: " + energys + " ");
+				// System.out.print("guarantEPunish: " + guarantEPunish + " ");
+				// System.out.print("que_ecoPunish: " + que_ecoPunish + " ");
+				// System.out.print("que_navPunish: " + que_navPunish + " ");
+				// System.out.println("minLeveLimit: " + minLeveLimit);
+				// System.out.println("fitness: " + fitness);
+
 				// energys-deepdestroy-que_ecoPunish-que_navPunish-guarantEPunish//-guarantEPunish-deepdestroy-hydro_punish-minLeveLimit
 				// System.out.println(nodeNames[i]+"系数"+K[i]+" spills="+spills+"
 				// energys="+energys+" que_ecoPunish="+que_ecoPunish+"
@@ -177,7 +202,7 @@ public class simOptProcess_SanXia {
 		// double spills[]=new double[inflowss.length];
 		double outflow[] = new double[inflowss.length];
 		// -----------------------
-		double record[] = new double[7];// 记录
+		double record[] = new double[8];// 记录
 		// -----------------------
 
 		int starts = 0;
@@ -219,10 +244,11 @@ public class simOptProcess_SanXia {
 		// startvol=basicbean.getNormalvolumn()*Vunit;//------------------------初始库容floodHighLevel
 		// double
 		// startlev=basicbean.getNormalLevel();//-------------------------------初始水位
-		double startlev = floodHighLevel;
+		double startlev = normalLevel;
 		double startvol = MathFun.insert2(startlev, ZV[0], ZV[1], ZV[0].length) * Vunit;
 
 		double deadvol = basicbean.getDeadvolumn() * Vunit;
+		double energytal = 0;
 		for (int i = starts; i < ends; i++) {
 			// for(int i=0;i<20;i++){
 			double inflowall = inflowss[i];
@@ -269,6 +295,8 @@ public class simOptProcess_SanXia {
 			if (nav_supply_flow == -1024) {
 				navSupplyFlow = nav_supply_flowpro[i] * deltaT * 3600;// ----------------------------修改：流量转为水量
 			}
+
+			//-----------三峡专用代码---------------
 			double other_mini_flow1 = 0;
 			if (other_mini_flow == -1024) {
 				other_mini_flow1 = other_mini_flowpro[i];
@@ -301,6 +329,9 @@ public class simOptProcess_SanXia {
 					}
 				}
 			}
+			//-----------三峡专用代码---------------
+
+
 			// System.out.println(resName+"："+other_mini_flow1+"："+optQout[i]);
 			/**
 			 * 1 城镇和农业用水调度
@@ -326,14 +357,14 @@ public class simOptProcess_SanXia {
 			// double minGuaranteedCapacityLow=GuaranteedCapacity/9.81/efficiencyCOE/;
 
 			// System.out.println(optQout[i]);
-			double hydroVol = optQout[i] * deltaT * 3600;// 转换为流量
+			double hydroVol = optQout[i] * deltaT * 3600;// 转换为水量
 			// System.out.println("hydroVol="+ hydroVol );
 			/**
 			 * 判断可用水量是否为负
 			 * 为负,说明存在深度破坏
 			 */
 			if (availableQ < hydroVol) {
-				record[0] = record[0] + (hydroVol - availableQ);// --------------------深度破坏，保持高水位
+				record[0] = record[0] + (((availableQ - hydroVol)/deltaT/3600)/hypower_max_outflow-1); // --------------------深度破坏惩罚，负值
 				// System.out.println(i+" "+availableQ);
 				// balances[11][i]=1;
 				hydroVol = availableQ;
@@ -359,19 +390,19 @@ public class simOptProcess_SanXia {
 				// System.out.println(spills);
 				// System.out.println(hypower_max_outflow);
 			}
-			record[6] = record[6] + spills;
+			record[1] = record[1] - (spills/deltaT/3600/hypower_max_outflow+1); // --------------------弃水惩罚，负值
 			outflow[i] = hydroVol + spills;
 			// System.out.println("endvolss="+ endvolss );
 			double endlevel = MathFun.insert2((endvolss / Vunit), ZV[1], ZV[0], ZV[0].length);
 
 			if (endlevel < minLeve[i]) {
-				record[5] = record[5] + 100000;
+				record[2] = record[2] + (endlevel - minLeve[i]-1); // --------------------末水位低于死水位惩罚，负值，该惩罚不应该出现
 				// System.out.println(minLeve[i]);
 			}
 			// System.out.println(resName+"："+other_mini_flow);
 			if ((other_mini_flow1 >= 525) && (other_mini_flow1 < 611)) {// ------------------------------------------------仅针对三峡
 				if ((startlev - endlevel) > 1) {
-					record[5] = record[5] + 10000000;
+					record[7] = record[7] - (startlev - endlevel); // --------------------水位变动惩罚，负值，仅针对三峡
 					// System.out.println("startlev="+ startlev+" endlevel="+ endlevel+"
 					// (startlev-endlevel)="+ (startlev-endlevel) );
 				}
@@ -397,12 +428,12 @@ public class simOptProcess_SanXia {
 			 */
 			// System.out.println("availableQ= "+hydroQout+" Qmax= "+Qmax/(deltaT*3600));
 			double energy = 0;
-			double energy1 = 0;
+			// double energy1 = 0;
 			if (efficiencyCOE == -1024) {// 采用耗水率曲线
 				// 采用耗水率曲线
 			} else {
 				double tailleve = 0;
-				if (availableQ < 0) {// 深度破环时水量处理
+				if (availableQ <= 0) {// 深度破环时水量处理
 					availableQ = 0;
 				}
 				double transAvailableQ = outflow[i] / (deltaT * 3600);
@@ -416,34 +447,35 @@ public class simOptProcess_SanXia {
 				double punish = 0;
 				double Head = (startlev + endlevel) / 2.0 - tailleve;// deadLevel
 				double minHead = 1;
-				double HeadShu = (Head - (deadLevel - tailleve)) / (normalLevel - deadLevel);
-				if (resName.equals("乌东德")) {
-					minHead = 1 + HeadShu * 0.3;
-				} else if (resName.equals("白鹤滩")) {
-					minHead = 1 + HeadShu * 1.5;
-				} else if (resName.equals("溪洛渡")) {
-					minHead = 1 + HeadShu * 0.2;
-				} else if (resName.equals("三峡")) {
-					minHead = 1 + HeadShu * 0.1;
-				}
+				// double HeadShu = (Head - (deadLevel - tailleve)) / (normalLevel - deadLevel);
+				// if (resName.equals("乌东德")) {
+				// 	minHead = 1 + HeadShu * 0.3;
+				// } else if (resName.equals("白鹤滩")) {
+				// 	minHead = 1 + HeadShu * 1.5;
+				// } else if (resName.equals("溪洛渡")) {
+				// 	minHead = 1 + HeadShu * 0.2;
+				// } else if (resName.equals("三峡")) {
+				// 	minHead = 1 + HeadShu * 0.1;
+				// }
 				// System.out.println("Head= "+Head+"，startlev= "+startlev+"，endlevel=
 				// "+endlevel+"，tailleve= "+tailleve);
 				// System.out.println(resName+" "+minHead);
-				energy1 = (9.81 * efficiencyCOE * hydroQout * Head * minHead * deltaT);// -----------------------------增加水头敏感度
+				// energy1 = (9.81 * efficiencyCOE * hydroQout * Head * minHead * deltaT);// ------------------------增加水头敏感度
 				energy = (9.81 * efficiencyCOE * hydroQout * Head * deltaT);// 单位KW*H，//如果乘以deltaT即为KW*h
 				if (energy < (1 * GuaranteedCapacity * deltaT)) {
-					punish = (1 * GuaranteedCapacity * deltaT) - energy;
+					punish = energy - (1 * GuaranteedCapacity * deltaT);
 					baozhelv[0] = baozhelv[0] + 1;
 					// System.out.println("不满足最小出力");
 				}
-				// System.out.println("InstalledCapacity "+InstalledCapacity/10000);
+				// System.out.println(energy +" 	"+ GuaranteedCapacity * deltaT +" 	"+ InstalledCapacity * deltaT);
 				if (energy > (InstalledCapacity * deltaT)) {
 					energy = InstalledCapacity * deltaT;
 				}
+				energytal = energytal + energy;
 				// System.out.println((InstalledCapacity*deltaT)/100000+"
 				// energy="+energy/100000+" "+(GuaranteedCapacity*deltaT)/100000);
-				record[1] = record[1] + energy1;// 单位KW*H
-				record[2] = record[2] + punish;
+				record[3] = record[3] + energy/(InstalledCapacity * deltaT); // --------------------发电量奖励，正值
+				record[4] = record[4] + (punish/GuaranteedCapacity * deltaT-1); // --------------------发电保证率惩罚，负值
 			}
 
 			/**
@@ -457,10 +489,14 @@ public class simOptProcess_SanXia {
 				baozhelv[1] = baozhelv[1] + 1;
 				que_ecoflow = ecoFlow - outflow[i];// 可用水量低，计算生态缺水量，单位：立方米
 				// ecoFlow=availableQ;
+				record[5] = record[5] - (que_ecoflow/ecoFlow+1); // --------------------生态惩罚，负值
+
+				//-----------三峡专用代码---------------
 				if (other_mini_flow1 > 0 & (other_mini_flow1 < 400 | other_mini_flow1 > 1000)) {
-					record[3] = record[3] + que_ecoflow + 1000000000;
+					record[5] = record[5] - (que_ecoflow/ecoFlow+1)*100;
 				}
-				record[3] = record[3] + que_ecoflow;
+				//-----------三峡专用代码---------------
+
 			}
 			double que_navflow = 0;
 			if (navSupplyFlow <= outflow[i]) {
@@ -469,40 +505,21 @@ public class simOptProcess_SanXia {
 				baozhelv[2] = baozhelv[2] + 1;
 				que_navflow = navSupplyFlow - outflow[i];// 可用水量低，计算航运缺水量
 				// navSupplyFlow=availableQ;
+				record[6] = record[6] - (que_navflow/navSupplyFlow+1); // --------------------航运惩罚，负值
+				
+				//-----------三峡专用代码---------------
 				if (other_mini_flow1 > 0 & (other_mini_flow1 < 400 | other_mini_flow1 > 1000)) {
-					record[4] = record[4] + (que_navflow + 1000000000) * 100;
+					record[6] = record[6] - (que_navflow/navSupplyFlow+1)* 100;
 					// System.out.println(resName+(que_navflow+1000000000)*100);
 				} else if (resName.equals("向家坝")) {
-					record[4] = record[4] + (que_navflow + 1000000000) * 100;
+					record[6] = record[6]  - (que_navflow/navSupplyFlow+1) * 100;
 					// System.out.println(resName+(que_navflow+1000000000)*100);
-				} else {
-					record[4] = record[4] + que_navflow;
-					// System.out.println(resName+que_navflow);
-				}
+				} 
+				//-----------三峡专用代码---------------
+
 			}
 
 			// ----水量平衡表------------
-			// if (saves == 1) {
-			// 	balances[0][i + 1] = startlev;// optlines[i];
-			// 	balances[1][i + 1] = startvol;
-			// 	balances[2][i + 1] = inflowss[i];
-			// 	balances[3][i + 1] = 0;
-			// 	if (upstream != null) {
-			// 		balances[3][i + 1] = upstream[i];
-			// 	} // 上游水库来水
-			// 	balances[4][i + 1] = spills / 24 / 3600;// 弃水
-			// 	balances[5][i + 1] = citySupplyFlow;
-			// 	balances[6][i + 1] = agrSupplyFlow;
-			// 	balances[7][i + 1] = hydroQout;
-			// 	balances[7][0] = 1 - baozhelv[0] / inflowss.length;
-			// 	balances[8][i + 1] = que_ecoflow;
-			// 	balances[8][0] = 1 - baozhelv[1] / inflowss.length;
-			// 	balances[9][i + 1] = que_navflow;
-			// 	balances[9][0] = 1 - baozhelv[2] / inflowss.length;
-			// 	balances[10][i + 1] = energy;
-			// 	balances[10][0] = (balances[10][0] + balances[10][i + 1]) / 100000000;
-			// 	balances[11][i + 1] = hydroQout + spills / 24 / 3600;// 下泄
-			// }
 			if (saves == 1) {
 				balances[0][i + 1] = minLeve[i];
 				balances[1][i + 1] = startlev;// optlines[i];
@@ -523,7 +540,7 @@ public class simOptProcess_SanXia {
 				balances[11][i + 1] = que_navflow;
 				balances[11][0] = 1 - baozhelv[2] / inflowss.length;
 				balances[12][i + 1] = energy;
-				balances[12][0] = (balances[10][0] + balances[10][i + 1]) / 100000000;
+				balances[12][0] = energytal / inflowss.length;
 				balances[13][i + 1] = hydroQout + spills / 24 / 3600;// 下泄
 			}
 			// -----------------------
@@ -549,18 +566,18 @@ public class simOptProcess_SanXia {
 		double muliobj_punish[] = new double[3];
 		if (hyp_guarant > 50) {// 大于50%才判断考虑了保证率约束
 			if (baozhelv1[0] < hyp_guarant) {
-				muliobj_punish[0] = hyp_guarant - baozhelv1[0];
+				muliobj_punish[0] = baozhelv1[0] - hyp_guarant; // --------------------发电保证率惩罚，负值
 			}
 		}
 		// System.out.println(eco_guarant);
 		if (eco_guarant > 50) {// 大于50%才判断考虑了保证率约束
 			if (baozhelv1[1] < eco_guarant) {
-				muliobj_punish[1] = eco_guarant - baozhelv1[1];
+				muliobj_punish[1] = baozhelv1[1] - eco_guarant; // --------------------生态保证率惩罚，负值
 			}
 		}
 		if (nav_guarant > 50) {// 大于50%才判断考虑了保证率约束
 			if (baozhelv1[2] < nav_guarant) {
-				muliobj_punish[2] = nav_guarant - baozhelv1[2];
+				muliobj_punish[2] = baozhelv1[2] - nav_guarant; // --------------------航运保证率惩罚，负值
 			}
 		}
 
@@ -578,9 +595,11 @@ public class simOptProcess_SanXia {
 		 * 1 水量平衡表
 		 * 2 保证率
 		 */
+		
 		if (saves == 1) {
 			Save_xls_Date save = new Save_xls_Date();
 			String savePath = basicbean.getSavebalance();
+
 			try {
 				// boolean flag1 = save.saveCol(savePath+resName+".xls", baozhelv);
 				boolean flag2 = save.saveCols(savePath + resName + OutputName, balances);
